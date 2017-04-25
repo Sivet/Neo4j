@@ -6,9 +6,8 @@ using System.Threading.Tasks;
 
 namespace Jordbrugsteknologi
 {
-    class Person
+    class Row
     {
-        public string Name { get; set; }
-        public int Height { get; set; }
+        public int Number { get; set; }
     }
 }

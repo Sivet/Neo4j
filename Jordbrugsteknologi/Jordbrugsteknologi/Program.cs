@@ -9,24 +9,98 @@ namespace Jordbrugsteknologi
 {
     class Program
     {
+        GraphClient client;
+        Field field;
+        List<Field> result;
+        Row row;
         static void Main(string[] args)
         {
-            //Make connection
-            GraphClient client = new GraphClient(new Uri("http://localhost:7474/db/data"), "Sivet", "glashoffhoff456");
+            Program myProgram = new Program();
+            myProgram.field = new Field();
+            myProgram.row = new Row();
+
+            myProgram.field.Name = "Marken";
+            myProgram.row.Number = 42;
+
+            myProgram.Create(myProgram.field, myProgram.row);
+            
+            myProgram.result = myProgram.Test(myProgram.field, myProgram.row);
+
+            Console.ReadKey();
+        }
+        private void Connect()
+        {
+            client = new GraphClient(new Uri("http://localhost:7474/db/data"), "username", "password");
             client.Connect();
+        }
+        private void Disconnect()
+        {
+            client.Dispose();
+        }
 
-            //Intantiation objects
-            Person person1 = new Person();
-            person1.Name = "Simon";
-            person1.Height = 42;
+        public void Create(Field field, Row row)
+        {
+            try
+            {
+                Connect();
+                client.Cypher
+                        .Create("(field:Field {prop})")
+                        .WithParam("prop", field)
+                        .ExecuteWithoutResults();
 
-            Person person2 = new Person();
-            person2.Name = "Benny";
-            person2.Height = 40;
+                //client.Cypher
+                //       .Match("(field:Field)")
+                //        .Where("field.Name = '" + field.Name + "'")
+                //        .Create("(field)-[:CONTAINS]->(row:Row {prop})")
+                //       .WithParam("prop", row)
+                //       .ExecuteWithoutResults();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+            finally
+            {
+                Disconnect();
+            }
+        }
+        public void Delete(Field field)
+        {
 
-            //Create objects
-            client.Create(new Person() { Name = person1.Name });
-            client.Create(person2);
+            try
+            {
+                Connect();
+                
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+            finally
+            {
+                Disconnect();
+            }
+        }
+        public List<Field> Test(Field fields, Row row)
+        {
+            try
+            {
+                Connect();
+                return client.Cypher
+                    .Match("(field:Field)")
+                    .Where("field.Name = '" + fields.Name + "'")
+                    .Return(field => field.As<Field>())
+                    .Results.ToList();
+                
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+            finally
+            {
+                Disconnect();
+            }
         }
     }
 }

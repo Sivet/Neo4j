@@ -48,12 +48,12 @@ namespace Jordbrugsteknologi
                         .WithParam("prop", field)
                         .ExecuteWithoutResults();
 
-                //client.Cypher
-                //       .Match("(field:Field)")
-                //        .Where("field.Name = '" + field.Name + "'")
-                //        .Create("(field)-[:CONTAINS]->(row:Row {prop})")
-                //       .WithParam("prop", row)
-                //       .ExecuteWithoutResults();
+                client.Cypher
+                       .Match("(field:Field)")
+                        .Where("field.Name = '" + field.Name + "'")
+                        .Create("(field)-[:CONTAINS]->(row:Row {prop})")
+                       .WithParam("prop", row)
+                       .ExecuteWithoutResults();
             }
             catch (Exception)
             {

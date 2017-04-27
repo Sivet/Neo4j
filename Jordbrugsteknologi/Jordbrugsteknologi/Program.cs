@@ -43,8 +43,7 @@ namespace Jordbrugsteknologi
         {
             client.Dispose();
         }
-
-        public void CreateField(Field field) //Creates a Field
+        public void CreateField(Field field)
         {
             try
             {
@@ -121,11 +120,11 @@ namespace Jordbrugsteknologi
 
                 foreach (var item in a)
                 {
-                    Field tempField = item.Field;
-                    tempField.rows = item.Row.ToList();
-                    temp.Add(tempField);
-                    //item.Field.rows = item.Row.ToList();
-                    //temp.Add(item.Field);
+                    //Field tempField = item.Field;
+                    //tempField.rows = item.Row.ToList();
+                    //temp.Add(tempField);
+                    item.Field.rows = item.Row.ToList();
+                    temp.Add(item.Field);
                     //temp.Add(item.Field.Name, item.Row.ToList());
                 }
 

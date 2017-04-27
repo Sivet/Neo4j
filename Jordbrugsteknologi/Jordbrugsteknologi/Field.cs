@@ -9,5 +9,14 @@ namespace Jordbrugsteknologi
     class Field
     {
         public string Name { get; set; }
+        public List<Row> rows;
+
+        public Field()
+        {
+            if (rows == null)
+            {
+                rows = new List<Row>();
+            }
+        }
     }
 }

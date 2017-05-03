@@ -68,7 +68,7 @@ namespace Jordbrugsteknologi
 
             CreateCompleteField(field);
 
-            result = ReadCompleteField(field);
+            //result = ReadCompleteField(field);
 
             //Console.ReadKey();
         }
@@ -103,26 +103,46 @@ namespace Jordbrugsteknologi
                 //Matches the field with its rows and creates the relations
                 foreach (Row row in TempRows)
                 {
-                    //laver temp objecter af Crop, Weed og Herbicide og tømmer
+                    //laver temp objecter af Crop, Weed og Herbicide og tømmer den row
                     Crop tempCrop = row.Crop;
                     row.Crop = null;
 
                     Weed tempWeed = row.Weed;
                     row.Weed = null;
 
-                    Herbicide TempHerbicide = row.Herbicide;
+                    Herbicide tempHerbicide = row.Herbicide;
                     row.Herbicide = null;
-                    //Tøm row'en du står på
-                    //kør den følgende cypher
+                    //Opretter row med relation til fielden
                     client.Cypher
                            .Match("(field:Field)")
                            .Where("field.Name = '" + field.Name + "'")
                            .Create("(field)-[:CONTAINS]->(row:Row {Number})")
                            .WithParam("Number", row)
                            .ExecuteWithoutResults();
-                    //lav cypher for at koble crop, weed og herbicide på den nuværende row
+                    //Opretter crop med relation til den row vi er på
+                    client.Cypher
+                        .Match("(row:Row)")
+                        .Where("row.Number = '" + row.Number + "'")
+                        .Create("(row)<-[:PLANTED_IN]-(crop:Crop {Name})")
+                        .WithParam("Name", tempCrop)
+                        .ExecuteWithoutResults();
+                    //Opretter weed med relation til den row vi er på
+                    client.Cypher
+                        .Match("(row:Row)")
+                        .Where("row.Number = '" + row.Number + "'")
+                        .Create("(row)<-[:PLANTED_IN]-(weed:Weed {Name})")
+                        .WithParam("Name", tempWeed)
+                        .ExecuteWithoutResults();
+                    //Opretter herbicide til den row vi er på
+                    client.Cypher
+                        .Match("(row:Row)")
+                        .Where("row.Number = '" + row.Number + "'")
+                        .Create("(row)<-[:USED_IN]-(herbicide:Herbicide {prop})")
+                        .WithParam("Dose", tempHerbicide)
+                        .WithParam("Name", tempHerbicide)
+                        .ExecuteWithoutResults();
                 }
-                
+
             }
             catch (Exception)
             {

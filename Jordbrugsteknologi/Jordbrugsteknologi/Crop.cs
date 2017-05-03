@@ -6,18 +6,12 @@ using System.Threading.Tasks;
 
 namespace Jordbrugsteknologi
 {
-    class Field
+    class Crop
     {
         public string Name { get; set; }
-        public List<Row> rows = new List<Row>();
-
-        public Field(string name)
+        public Crop(string name)
         {
             this.Name = name;
-        }
-        public Field()
-        {
-
         }
     }
 }

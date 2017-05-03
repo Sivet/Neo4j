@@ -6,18 +6,14 @@ using System.Threading.Tasks;
 
 namespace Jordbrugsteknologi
 {
-    class Field
+    class Herbicide
     {
+        public double Dose { get; set; }
         public string Name { get; set; }
-        public List<Row> rows = new List<Row>();
-
-        public Field(string name)
+        public Herbicide(double dose, string name)
         {
+            this.Dose = dose;
             this.Name = name;
-        }
-        public Field()
-        {
-
         }
     }
 }

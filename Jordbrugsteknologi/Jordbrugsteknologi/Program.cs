@@ -11,28 +11,66 @@ namespace Jordbrugsteknologi
     class Program
     {
         GraphClient client;
-        Field field;
         List<Field> result;
-        Row row1;
-        Row row2;
+
         static void Main(string[] args)
         {
             Program myProgram = new Program();
-            myProgram.field = new Field();
-            myProgram.row1 = new Row();
-            myProgram.row2 = new Row();
+            myProgram.Run();
+            
+        }
+        public void Run()
+        {
+            //Make the different types of weed
+            Weed Crabgrass = new Weed("Crabgrass");
+            Weed Quackgrass = new Weed("Quackgrass");
+            Weed MoringGlory = new Weed("Moring Glory");
+            Weed Pigweed = new Weed("Pigweed");
 
-            myProgram.field.Name = "Marken";
-            myProgram.row1.Number = 42;
-            myProgram.row2.Number = 24;
+            //Make the different types of herbicide
+            Herbicide Simazine = new Herbicide(5.25, "Simazine");
+            Herbicide Terbuthylazine = new Herbicide(42, "Terbuthylazine");
+            Herbicide Versatil = new Herbicide(2.55, "Versatil");
 
-            myProgram.CreateField(myProgram.field);
-            myProgram.CreateRow(myProgram.row1, myProgram.field);
-            myProgram.CreateRow(myProgram.row2, myProgram.field);
+            //Make the different types of crop
+            Crop Wheat = new Crop("Wheat");
 
-            myProgram.result = myProgram.Test(myProgram.field);
+            //Make the number of rows in the field
+            Row row1 = new Row(1,Crabgrass, Wheat, Simazine);
+            Row row2 = new Row(2, Crabgrass, Wheat, Terbuthylazine);
+            Row row3 = new Row(3, Crabgrass, Wheat, Versatil);
+            Row row4 = new Row(4, Quackgrass, Wheat, Simazine);
+            Row row5 = new Row(5, Quackgrass, Wheat, Terbuthylazine);
+            Row row6 = new Row(6, Quackgrass, Wheat, Versatil);
+            Row row7 = new Row(7, MoringGlory, Wheat, Simazine);
+            Row row8 = new Row(8, MoringGlory, Wheat, Terbuthylazine);
+            Row row9 = new Row(9, MoringGlory, Wheat, Versatil);
+            Row row10 = new Row(10, Pigweed, Wheat, Simazine);
+            Row row11 = new Row(11, Pigweed, Wheat, Terbuthylazine);
+            Row row12 = new Row(12, Pigweed, Wheat, Versatil);
 
-            Console.ReadKey();
+            //Make the field
+            Field field = new Field("Marken");
+
+            //Add all the rows to the list in the field
+            field.rows.Add(row1);
+            field.rows.Add(row2);
+            field.rows.Add(row3);
+            field.rows.Add(row4);
+            field.rows.Add(row5);
+            field.rows.Add(row6);
+            field.rows.Add(row7);
+            field.rows.Add(row8);
+            field.rows.Add(row9);
+            field.rows.Add(row10);
+            field.rows.Add(row11);
+            field.rows.Add(row12);
+
+            CreateCompleteField(field);
+
+            result = ReadCompleteField(field);
+
+            //Console.ReadKey();
         }
         private void Connect()
         {
@@ -42,6 +80,59 @@ namespace Jordbrugsteknologi
         private void Disconnect()
         {
             client.Dispose();
+        }
+        public void CreateCompleteField(Field field)
+        {
+            List<Row> TempRows = new List<Row>();
+            try
+            {
+                //Empties the list of row to a temp list
+                foreach (Row row in field.rows)
+                {
+                    TempRows.Add(row);
+                }
+                field.rows = null;
+
+                Connect();
+                //Creates the field
+                client.Cypher
+                        .Create("(field:Field {Name})")
+                        .WithParam("Name", field)
+                        .ExecuteWithoutResults();
+
+                //Matches the field with its rows and creates the relations
+                foreach (Row row in TempRows)
+                {
+                    //laver temp objecter af Crop, Weed og Herbicide og tømmer
+                    Crop tempCrop = row.Crop;
+                    row.Crop = null;
+
+                    Weed tempWeed = row.Weed;
+                    row.Weed = null;
+
+                    Herbicide TempHerbicide = row.Herbicide;
+                    row.Herbicide = null;
+                    //Tøm row'en du står på
+                    //kør den følgende cypher
+                    client.Cypher
+                           .Match("(field:Field)")
+                           .Where("field.Name = '" + field.Name + "'")
+                           .Create("(field)-[:CONTAINS]->(row:Row {Number})")
+                           .WithParam("Number", row)
+                           .ExecuteWithoutResults();
+                    //lav cypher for at koble crop, weed og herbicide på den nuværende row
+                }
+                
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+            finally
+            {
+                Disconnect();
+            }
         }
         public void CreateField(Field field)
         {
@@ -105,12 +196,49 @@ namespace Jordbrugsteknologi
                 Disconnect();
             }
         }
-        public List<Field> Test(Field searchField)
+        public void DeleteRow(Row row)
         {
-            //Dictionary<string, List<Row>> temp = new Dictionary<string, List<Row>>();
+            try
+            {
+                Connect();
+                client.Cypher
+                    .Match("row:Row")
+                    .Where("row.Number = '" + row.Number + "'")
+                    .DetachDelete("row")
+                    .ExecuteWithoutResults();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+            finally
+            {
+                Disconnect();
+            }
+        }
+        public void DeleteCrop(Crop crop)
+        {
+
+        }
+        public void DeleteWeed(Weed weed)
+        {
+
+        }
+        public void DeleteHerbicide(Herbicide herbicide)
+        {
+
+        }
+        /// <summary>
+        /// ReadCompleteField giver en null exception hvis det field opbject man finder ikke har nogle rows
+        /// </summary>
+        /// <param name="searchField"></param>
+        /// <returns></returns>
+        public List<Field> ReadCompleteField(Field searchField)
+        {
             List<Field> temp = new List<Field>();
             try
             {
+                
                 Connect();
                 var a = client.Cypher
                     .OptionalMatch("(field:Field)-[CONTAINS]-(rows:Row)")
@@ -120,23 +248,11 @@ namespace Jordbrugsteknologi
 
                 foreach (var item in a)
                 {
-                    //Field tempField = item.Field;
-                    //tempField.rows = item.Row.ToList();
-                    //temp.Add(tempField);
-                    item.Field.rows = item.Row.ToList();
-                    temp.Add(item.Field);
-                    //temp.Add(item.Field.Name, item.Row.ToList());
+                    item.Field.rows = item.Row.ToList(); //changing the IEnumerable of rows to a list
+                    temp.Add(item.Field); //Changing and adding the IEnumerable of Fields a list
                 }
 
                 return temp;
-                //return client.Cypher
-                //    .Match("(field:Field)")
-                //    .Where("field.Name = '" + fields.Name + "'")
-                //    .Return(field => field.As<Field>())
-                //    .Results.ToList();
-
-
-
             }
             catch (Exception)
             {

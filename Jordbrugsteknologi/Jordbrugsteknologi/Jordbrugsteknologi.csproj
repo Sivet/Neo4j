@@ -51,10 +51,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Crop.cs" />
     <Compile Include="Field.cs" />
+    <Compile Include="Herbicide.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Row.cs" />
+    <Compile Include="Weed.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

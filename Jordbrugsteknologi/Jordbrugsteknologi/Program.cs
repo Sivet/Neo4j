@@ -66,9 +66,9 @@ namespace Jordbrugsteknologi
             field.rows.Add(row11);
             field.rows.Add(row12);
 
-            CreateCompleteField(field);
+            //CreateCompleteField(field);
 
-            //result = ReadCompleteField(field);
+            result = ReadCompleteField(field);
 
             //Console.ReadKey();
         }
@@ -101,48 +101,57 @@ namespace Jordbrugsteknologi
                         .ExecuteWithoutResults();
 
                 //Matches the field with its rows and creates the relations
-                foreach (Row row in TempRows)
+                foreach (Row Thisrow in TempRows)
                 {
-                    //laver temp objecter af Crop, Weed og Herbicide og tømmer den row
-                    Crop tempCrop = row.Crop;
-                    row.Crop = null;
+                    //laver temp objecter af Crop, Weed og Herbicide og tømmer dem i row'en
+                    Crop tempCrop = Thisrow.Crop;
+                    Thisrow.Crop = null;
 
-                    Weed tempWeed = row.Weed;
-                    row.Weed = null;
+                    Weed tempWeed = Thisrow.Weed;
+                    Thisrow.Weed = null;
 
-                    Herbicide tempHerbicide = row.Herbicide;
-                    row.Herbicide = null;
+                    Herbicide tempHerbicide = Thisrow.Herbicide;
+                    Thisrow.Herbicide = null;
+                    
                     //Opretter row med relation til fielden
                     client.Cypher
                            .Match("(field:Field)")
                            .Where("field.Name = '" + field.Name + "'")
                            .Create("(field)-[:CONTAINS]->(row:Row {Number})")
-                           .WithParam("Number", row)
+                           .WithParam("Number", Thisrow)
                            .ExecuteWithoutResults();
+
+                    //Temp shit starts
+                    //var a = client.Cypher
+                    //    .Match("(rows:Row)")
+                    //    .Where((Row rows) => rows.Number == row.Number)
+                    //    .Return((rows) => new { Row = rows.As<Row>() })
+                    //    .Results;
+                    //Temp shit ends
+
                     //Opretter crop med relation til den row vi er på
                     client.Cypher
                         .Match("(row:Row)")
-                        .Where("row.Number = '" + row.Number + "'")
-                        .Create("(row)<-[:PLANTED_IN]-(crop:Crop {Name})")
+                        .Where((Row row) => row.Number == Thisrow.Number)
+                        .Create("(row)-[:PLANTED_IN]->(crop:Crop {Name})")
                         .WithParam("Name", tempCrop)
                         .ExecuteWithoutResults();
                     //Opretter weed med relation til den row vi er på
                     client.Cypher
                         .Match("(row:Row)")
-                        .Where("row.Number = '" + row.Number + "'")
+                        .Where((Row row) => row.Number == Thisrow.Number)
                         .Create("(row)<-[:PLANTED_IN]-(weed:Weed {Name})")
                         .WithParam("Name", tempWeed)
                         .ExecuteWithoutResults();
                     //Opretter herbicide til den row vi er på
                     client.Cypher
                         .Match("(row:Row)")
-                        .Where("row.Number = '" + row.Number + "'")
-                        .Create("(row)<-[:USED_IN]-(herbicide:Herbicide {prop})")
+                        .Where((Row row) => row.Number == Thisrow.Number)
+                        .Create("(row)<-[:USED_IN]-(herbicide:Herbicide {Dose})")
                         .WithParam("Dose", tempHerbicide)
-                        .WithParam("Name", tempHerbicide)
+                        //.WithParam("Name", tempHerbicide.Name)
                         .ExecuteWithoutResults();
                 }
-
             }
             catch (Exception)
             {
@@ -258,7 +267,6 @@ namespace Jordbrugsteknologi
             List<Field> temp = new List<Field>();
             try
             {
-                
                 Connect();
                 var a = client.Cypher
                     .OptionalMatch("(field:Field)-[CONTAINS]-(rows:Row)")

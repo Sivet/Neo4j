@@ -19,5 +19,9 @@ namespace Jordbrugsteknologi
             this.Crop = crop;
             this.Herbicide = herbicide;
         }
+        public Row()
+        {
+
+        }
     }
 }

@@ -66,11 +66,11 @@ namespace Jordbrugsteknologi
             field.rows.Add(row11);
             field.rows.Add(row12);
 
-            //CreateCompleteField(field);
+            CreateCompleteField(field);
 
             result = ReadCompleteField(field);
 
-            //Console.ReadKey();
+            Console.ReadKey();
         }
         private void Connect()
         {
@@ -120,15 +120,6 @@ namespace Jordbrugsteknologi
                            .Create("(field)-[:CONTAINS]->(row:Row {Number})")
                            .WithParam("Number", Thisrow)
                            .ExecuteWithoutResults();
-
-                    //Temp shit starts
-                    //var a = client.Cypher
-                    //    .Match("(rows:Row)")
-                    //    .Where((Row rows) => rows.Number == row.Number)
-                    //    .Return((rows) => new { Row = rows.As<Row>() })
-                    //    .Results;
-                    //Temp shit ends
-
                     //Opretter crop med relation til den row vi er på
                     client.Cypher
                         .Match("(row:Row)")

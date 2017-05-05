@@ -11,13 +11,14 @@ namespace Jordbrugsteknologi
     class Program
     {
         GraphClient client;
-        List<Field> result;
+        List<Field> resultField;
+        Row resultRow;
 
         static void Main(string[] args)
         {
             Program myProgram = new Program();
             myProgram.Run();
-            
+
         }
         public void Run()
         {
@@ -36,7 +37,7 @@ namespace Jordbrugsteknologi
             Crop Wheat = new Crop("Wheat");
 
             //Make the number of rows in the field
-            Row row1 = new Row(1,Crabgrass, Wheat, Simazine);
+            Row row1 = new Row(1, Crabgrass, Wheat, Simazine);
             Row row2 = new Row(2, Crabgrass, Wheat, Terbuthylazine);
             Row row3 = new Row(3, Crabgrass, Wheat, Versatil);
             Row row4 = new Row(4, Quackgrass, Wheat, Simazine);
@@ -68,7 +69,13 @@ namespace Jordbrugsteknologi
 
             CreateCompleteField(field);
 
-            result = ReadCompleteField(field);
+            Row row13 = new Row(13, Quackgrass, Wheat, Versatil);
+
+            CreateRowInField(row13, field);
+
+            //resultRow = ReadRowInField(row5.Number, field.Name);
+
+            //resultField = ReadCompleteField(field.Name);
 
             Console.ReadKey();
         }
@@ -81,23 +88,23 @@ namespace Jordbrugsteknologi
         {
             client.Dispose();
         }
-        public void CreateCompleteField(Field field)
+        public void CreateCompleteField(Field Thisfield)
         {
             List<Row> TempRows = new List<Row>();
             try
             {
                 //Empties the list of row to a temp list
-                foreach (Row row in field.rows)
+                foreach (Row row in Thisfield.rows)
                 {
                     TempRows.Add(row);
                 }
-                field.rows = null;
+                Thisfield.rows = null;
 
                 Connect();
                 //Creates the field
                 client.Cypher
                         .Create("(field:Field {Name})")
-                        .WithParam("Name", field)
+                        .WithParam("Name", Thisfield)
                         .ExecuteWithoutResults();
 
                 //Matches the field with its rows and creates the relations
@@ -112,19 +119,19 @@ namespace Jordbrugsteknologi
 
                     Herbicide tempHerbicide = Thisrow.Herbicide;
                     Thisrow.Herbicide = null;
-                    
+
                     //Opretter row med relation til fielden
                     client.Cypher
-                           .Match("(field:Field)")
-                           .Where("field.Name = '" + field.Name + "'")
-                           .Create("(field)-[:CONTAINS]->(row:Row {Number})")
-                           .WithParam("Number", Thisrow)
-                           .ExecuteWithoutResults();
+                        .Match("(field:Field)")
+                        .Where((Field field) => field.Name == Thisfield.Name)
+                        .Create("(field)-[:CONTAINS]->(row:Row {Number})")
+                        .WithParam("Number", Thisrow)
+                        .ExecuteWithoutResults();
                     //Opretter crop med relation til den row vi er på
                     client.Cypher
                         .Match("(row:Row)")
                         .Where((Row row) => row.Number == Thisrow.Number)
-                        .Create("(row)-[:PLANTED_IN]->(crop:Crop {Name})")
+                        .Create("(row)<-[:PLANTED_IN]-(crop:Crop {Name})")
                         .WithParam("Name", tempCrop)
                         .ExecuteWithoutResults();
                     //Opretter weed med relation til den row vi er på
@@ -153,128 +160,126 @@ namespace Jordbrugsteknologi
             {
                 Disconnect();
             }
-        }
-        public void CreateField(Field field)
+        } //Creates a field with all imbedded objects
+        public void CreateRowInField(Row Thisrow, Field Thisfield) //Creates a row and makes the relation to a field
         {
             try
             {
                 Connect();
-                client.Cypher
-                        .Create("(field:Field {prop})")
-                        .WithParam("prop", field)
-                        .ExecuteWithoutResults();
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-            finally
-            {
-                Disconnect();
-            }
-        }
-        public void CreateRow(Row row, Field field) //Creates a row and makes the relation to a field
-        {
-            try
-            {
-                Connect();
-                client.Cypher
-                       .Match("(field:Field)")
-                       .Where("field.Name = '" + field.Name + "'")
-                       .Create("(field)-[:CONTAINS]->(row:Row {prop})")
-                       .WithParam("prop", row)
-                       .ExecuteWithoutResults();
-            }
-            catch (Exception)
-            {
+                //laver temp objecter af Crop, Weed og Herbicide og tømmer dem i row'en
+                Crop tempCrop = Thisrow.Crop;
+                Thisrow.Crop = null;
 
-                throw;
-            }
-            finally
-            {
-                Disconnect();
-            }
+                Weed tempWeed = Thisrow.Weed;
+                Thisrow.Weed = null;
 
-        }
-        public void DeleteField(Field field) //Finds a field and deletes the field and all its relationships BUT not the objects
-        {
-            try
-            {
-                Connect();
+                Herbicide tempHerbicide = Thisrow.Herbicide;
+                Thisrow.Herbicide = null;
+
+                //Opretter row med relation til fielden
                 client.Cypher
-                    .Match("field:Field")
-                    .Where("field.Name = '" + field.Name + "'")
-                    .DetachDelete("field")
+                    .Match("(field:Field)")
+                    .Where((Field field) => field.Name == Thisfield.Name)
+                    .Create("(field)-[:CONTAINS]->(row:Row {Number})")
+                    .WithParam("Number", Thisrow)
+                    .ExecuteWithoutResults();
+                //Opretter crop med relation til den row vi er på
+                client.Cypher
+                    .Match("(row:Row)")
+                    .Where((Row row) => row.Number == Thisrow.Number)
+                    .Create("(row)-[:PLANTED_IN]->(crop:Crop {Name})")
+                    .WithParam("Name", tempCrop)
+                    .ExecuteWithoutResults();
+                //Opretter weed med relation til den row vi er på
+                client.Cypher
+                    .Match("(row:Row)")
+                    .Where((Row row) => row.Number == Thisrow.Number)
+                    .Create("(row)<-[:PLANTED_IN]-(weed:Weed {Name})")
+                    .WithParam("Name", tempWeed)
+                    .ExecuteWithoutResults();
+                //Opretter herbicide til den row vi er på
+                client.Cypher
+                    .Match("(row:Row)")
+                    .Where((Row row) => row.Number == Thisrow.Number)
+                    .Create("(row)<-[:USED_IN]-(herbicide:Herbicide {Dose})")
+                    .WithParam("Dose", tempHerbicide)
+                    //.WithParam("Name", tempHerbicide.Name)
                     .ExecuteWithoutResults();
             }
             catch (Exception)
             {
+
                 throw;
             }
             finally
             {
                 Disconnect();
             }
-        }
-        public void DeleteRow(Row row)
-        {
-            try
-            {
-                Connect();
-                client.Cypher
-                    .Match("row:Row")
-                    .Where("row.Number = '" + row.Number + "'")
-                    .DetachDelete("row")
-                    .ExecuteWithoutResults();
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-            finally
-            {
-                Disconnect();
-            }
-        }
-        public void DeleteCrop(Crop crop)
-        {
 
         }
-        public void DeleteWeed(Weed weed)
+        public void DeleteRowInField(Row Thisrow, Field Thisfield)
         {
-
-        }
-        public void DeleteHerbicide(Herbicide herbicide)
-        {
-
+            
         }
         /// <summary>
         /// ReadCompleteField giver en null exception hvis det field opbject man finder ikke har nogle rows
         /// </summary>
         /// <param name="searchField"></param>
         /// <returns></returns>
-        public List<Field> ReadCompleteField(Field searchField)
+        public List<Field> ReadCompleteField(string FieldName)
         {
             List<Field> temp = new List<Field>();
             try
             {
                 Connect();
                 var a = client.Cypher
-                    .OptionalMatch("(field:Field)-[CONTAINS]-(rows:Row)")
-                    .Where("field.Name = '" + searchField.Name + "'")
-                    .Return((field, rows) => new { Field = field.As<Field>(), Row = rows.CollectAs<Row>() })
+                    .OptionalMatch("(field:Field)-[CONTAINS]-(row:Row)") //tilføj at finde alle rows "venner" der ikke er field
+                    .Where((Field field) => field.Name == FieldName)
+                    .Return((field, row) =>
+                    new { Field = field.As<Field>(), Row = row.CollectAs<Row>() }) //Find ud af hvilken form det skal returnes i
                     .Results;
 
                 foreach (var item in a)
                 {
                     item.Field.rows = item.Row.ToList(); //changing the IEnumerable of rows to a list
-                    temp.Add(item.Field); //Changing and adding the IEnumerable of Fields a list
+                    temp.Add(item.Field); //Changing and adding the IEnumerable of Fields to a list
+                    //Tilføj overførelse af crop, weed, herbicide til den korrekte Row
                 }
 
                 return temp;
             }
             catch (Exception)
             {
+                throw;
+            }
+            finally
+            {
+                Disconnect();
+            }
+        }
+        public Row ReadRowInField(int RowNumber, string FieldName) //Mangler udflaskning af crop, weed, herbicide
+        {
+            try
+            {
+                Connect();
+                var a = client.Cypher
+                    .OptionalMatch("(field:Field)-[CONTAINS]-(row:Row)")
+                    .Where((Field field) => field.Name == FieldName)
+                    .Return((row) =>
+                    new { Row = row.As<Row>() })
+                    .Results;
+                foreach (var item in a)
+                {
+                    if (item.Row.Number == RowNumber)
+                    {
+                        return item.Row;
+                    }
+                }
+                return null;
+            }
+            catch (Exception)
+            {
+
                 throw;
             }
             finally

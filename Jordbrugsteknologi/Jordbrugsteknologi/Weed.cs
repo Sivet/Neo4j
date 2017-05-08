@@ -9,6 +9,7 @@ namespace Jordbrugsteknologi
     class Weed
     {
         public string Name { get; set; }
+        public Weed() { }
         public Weed(string name)
         {
             this.Name = name;

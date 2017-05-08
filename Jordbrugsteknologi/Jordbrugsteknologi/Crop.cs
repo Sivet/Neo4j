@@ -9,6 +9,7 @@ namespace Jordbrugsteknologi
     class Crop
     {
         public string Name { get; set; }
+        public Crop() { }
         public Crop(string name)
         {
             this.Name = name;

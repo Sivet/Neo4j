@@ -67,17 +67,17 @@ namespace Jordbrugsteknologi
             field.rows.Add(row11);
             field.rows.Add(row12);
 
-            CreateCompleteField(field);
+            //CreateCompleteField(field);
 
-            Row row13 = new Row(13, Quackgrass, Wheat, Versatil);
+            //Row row13 = new Row(13, Quackgrass, Wheat, Versatil);
 
-            CreateRowInField(row13, field);
+            //CreateRowInField(row13, field);
 
             //resultRow = ReadRowInField(row5.Number, field.Name);
 
-            //resultField = ReadCompleteField(field.Name);
+            resultField = ReadCompleteField(field.Name);
 
-            Console.ReadKey();
+            //Console.ReadKey();
         }
         private void Connect()
         {
@@ -138,7 +138,7 @@ namespace Jordbrugsteknologi
                     client.Cypher
                         .Match("(row:Row)")
                         .Where((Row row) => row.Number == Thisrow.Number)
-                        .Create("(row)<-[:PLANTED_IN]-(weed:Weed {Name})")
+                        .Create("(row)<-[:ATTACKING]-(weed:Weed {Name})")
                         .WithParam("Name", tempWeed)
                         .ExecuteWithoutResults();
                     //Opretter herbicide til den row vi er på
@@ -233,17 +233,17 @@ namespace Jordbrugsteknologi
             {
                 Connect();
                 var a = client.Cypher
-                    .OptionalMatch("(field:Field)-[CONTAINS]-(row:Row)") //tilføj at finde alle rows "venner" der ikke er field
+                    .Match("(field:Field)-[CONTAINS]->(row)<-[PLANTED_IN]-(crop), (row)<-[ATTACKING]-(weed), (row)<-[USED_IN]-(herbicide)")
                     .Where((Field field) => field.Name == FieldName)
-                    .Return((field, row) =>
-                    new { Field = field.As<Field>(), Row = row.CollectAs<Row>() }) //Find ud af hvilken form det skal returnes i
+                    .Return((field, row, crop, weed, herbicide) =>
+                    new { Field = field.As<Field>(), Row = row.CollectAs<Row>(), Crop = crop.As<Crop>(), Weed = weed.As<Weed>(), Herbicide = herbicide.As<Herbicide>() })
                     .Results;
 
                 foreach (var item in a)
                 {
-                    item.Field.rows = item.Row.ToList(); //changing the IEnumerable of rows to a list
-                    temp.Add(item.Field); //Changing and adding the IEnumerable of Fields to a list
-                    //Tilføj overførelse af crop, weed, herbicide til den korrekte Row
+                    //item.Field.rows = item.Row.ToList(); //changing the IEnumerable of rows to a list
+                    //temp.Add(item.Field); //Changing and adding the IEnumerable of Fields to a list
+                    ////Tilføj overførelse af crop, weed, herbicide til den korrekte Row
                 }
 
                 return temp;

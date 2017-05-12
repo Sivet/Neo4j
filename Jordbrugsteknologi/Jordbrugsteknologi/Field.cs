@@ -9,11 +9,13 @@ namespace Jordbrugsteknologi
     class Field
     {
         public string Name { get; set; }
+        public int Year { get; set; }
         public List<Row> rows = new List<Row>();
 
-        public Field(string name)
+        public Field(string name, int year)
         {
             this.Name = name;
+            this.Year = year;
         }
         public Field()
         {

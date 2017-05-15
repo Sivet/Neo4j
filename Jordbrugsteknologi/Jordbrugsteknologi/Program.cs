@@ -11,9 +11,8 @@ namespace Jordbrugsteknologi
 {
     class Program
     {
-        //static int id = 0;
         GraphClient client;
-        List<Field> resultField;
+        Field resultField;
         Row resultRow;
         Stopwatch timer;
 
@@ -290,18 +289,18 @@ namespace Jordbrugsteknologi
         public void DeleteRowInField(Row Thisrow, Field Thisfield)
         {
 
-        }
-        public List<Field> ReadCompleteField(string FieldName)
+        } //Not yet implemented
+        public Field ReadCompleteField(string FieldName)
         {
             List<Field> temp = new List<Field>();
             try
             {
                 Connect();
                 var a = client.Cypher
-                    .Match("(field:Field)-[CONTAINS]->(row)<-[PLANTED_IN]-(crop), (row)<-[ATTACKING]-(weed), (row)<-[USED_IN]-(herbicide)")
+                    .Match("(field:Field)-[CONTAINS]->(row)<-[PLANTED_IN]-(crop)")
                     .Where((Field field) => field.Name == FieldName)
-                    .Return((field, row, crop, weed, herbicide) =>
-                    new { Field = field.As<Field>(), Row = row.As<Row>(), Crop = crop.As<Crop>(), Weed = weed.As<Weed>(), Herbicide = herbicide.As<Herbicide>() })
+                    .Return((row, crop) =>
+                    new {Row = row.As<Row>(), Crop = crop.As<Crop>(), Weed = crop.As<Weed>(), Herbicide = crop.As<Herbicide>() })
                     .Results;
 
                 foreach (var item in a)
@@ -313,7 +312,7 @@ namespace Jordbrugsteknologi
                     //item.Field.rows = item.Row.ToList(); //changing the IEnumerable of rows to a list
                     //temp.Add(item.Field); //Changing and adding the IEnumerable of Fields to a list
                 }
-                return temp;
+                return null;
             }
             catch (Exception)
             {
@@ -323,8 +322,8 @@ namespace Jordbrugsteknologi
             {
                 Disconnect();
             }
-        }
-        public Row ReadRowInField(int RowNumber, string FieldName) //Giver mere end 1 row
+        } //Not yet implemented
+        public Row ReadRowInField(int RowNumber, string FieldName) //Finds a single Row in a Field
         {
             Row tempRow = new Row();
             try

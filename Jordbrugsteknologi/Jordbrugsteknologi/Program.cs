@@ -78,9 +78,9 @@ namespace Jordbrugsteknologi
                 //Row row13 = new Row(field.Name, 13, Quackgrass, Wheat, Versatil);
                 //CreateRowInField(row13, field);
 
-                resultRow = ReadRowInField(row5.Number, field.Name);
+                //resultRow = ReadRowInField(row5.Number, field.Name);
 
-                //resultField = ReadCompleteField(field.Name);
+                resultField = ReadCompleteField(field.Name);
 
                 //Console.ReadKey();
             
@@ -292,27 +292,28 @@ namespace Jordbrugsteknologi
         } //Not yet implemented
         public Field ReadCompleteField(string FieldName)
         {
-            List<Field> temp = new List<Field>();
+            Field tempField = new Field();
+            tempField.Name = FieldName;
             try
             {
                 Connect();
-                var a = client.Cypher
-                    .Match("(field:Field)-[CONTAINS]->(row)<-[PLANTED_IN]-(crop)")
+                long count = 0;
+                var number = client.Cypher
+                    .OptionalMatch("(field:Field)-[CONTAINS]-(row:Row)")
                     .Where((Field field) => field.Name == FieldName)
-                    .Return((row, crop) =>
-                    new {Row = row.As<Row>(), Crop = crop.As<Crop>(), Weed = crop.As<Weed>(), Herbicide = crop.As<Herbicide>() })
+                    .Return((row) => new { NumberOfRows = row.Count() })
                     .Results;
-
-                foreach (var item in a)
+                foreach (var item in number)
                 {
-                    item.Row.Crop = item.Crop;
-                    item.Row.Weed = item.Weed;
-                    item.Row.Herbicide = item.Herbicide;
-
-                    //item.Field.rows = item.Row.ToList(); //changing the IEnumerable of rows to a list
-                    //temp.Add(item.Field); //Changing and adding the IEnumerable of Fields to a list
+                    count = item.NumberOfRows;
                 }
-                return null;
+
+                for (int i = 1; i <= count; i++)
+                {
+                    tempField.rows.Add(ReadRowInField(i, FieldName));
+                }
+                
+                return tempField;
             }
             catch (Exception)
             {
@@ -322,10 +323,13 @@ namespace Jordbrugsteknologi
             {
                 Disconnect();
             }
-        } //Not yet implemented
+        } //Finds a field, counts its rows and read all the relations on each row
         public Row ReadRowInField(int RowNumber, string FieldName) //Finds a single Row in a Field
         {
             Row tempRow = new Row();
+            tempRow.Number = RowNumber;
+            tempRow.ID = FieldName.GetHashCode();
+
             try
             {
                 Connect();

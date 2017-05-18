@@ -12,6 +12,7 @@ namespace Jordbrugsteknologi
     class Program
     {
         GraphClient client;
+        List<string> fieldNames;
         Field resultField;
         Row resultRow;
         Stopwatch timer;
@@ -28,7 +29,7 @@ namespace Jordbrugsteknologi
             timer = new Stopwatch();
             
                 //Make the field
-                Field field = new Field("Marken2", 2017);
+                Field field = new Field("Marken1", 2017);
 
                 //Make the different types of weed
                 Weed Crabgrass = new Weed("Crabgrass");
@@ -80,7 +81,9 @@ namespace Jordbrugsteknologi
 
             //resultRow = ReadRowInField(row5.Number, field.Name);
 
-            resultField = ReadCompleteField(field.Name);
+            //resultField = ReadCompleteField(field.Name);
+
+            fieldNames = GetAllFieldNames();
 
             //Console.ReadKey();
             
@@ -360,6 +363,33 @@ namespace Jordbrugsteknologi
                 }
 
                 return tempRow;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+            finally
+            {
+                Disconnect();
+            }
+        }
+        public List<string> GetAllFieldNames()
+        {
+            List<string> temp = new List<string>();
+            try
+            {
+                Connect();
+                var a = client.Cypher
+                    .Match("(field:Field)")
+                    .Return(field => field.As<Field>())
+                    .Results;
+
+                foreach (var item in a)
+                {
+                    temp.Add(item.Name);
+                }
+                return temp;
             }
             catch (Exception)
             {

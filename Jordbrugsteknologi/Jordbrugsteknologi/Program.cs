@@ -83,7 +83,7 @@ namespace Jordbrugsteknologi
 
             //resultField = ReadCompleteField(field.Name);
 
-            fieldNames = GetAllFieldNames();
+            //fieldNames = GetAllFieldNames();
 
             //Console.ReadKey();
             

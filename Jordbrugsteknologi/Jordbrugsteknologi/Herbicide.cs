@@ -11,7 +11,7 @@ namespace Jordbrugsteknologi
         public double Dose { get; set; }
         public string Name { get; set; }
         public Herbicide() { }
-        public Herbicide(string id, double dose, string name)
+        public Herbicide(double dose, string name)
         {
             this.Dose = dose;
             this.Name = name;

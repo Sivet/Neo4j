@@ -26,24 +26,23 @@ namespace Jordbrugsteknologi
         public void Run()
         {
             timer = new Stopwatch();
-            timer.Start();
             
                 //Make the field
                 Field field = new Field("Marken2", 2017);
 
                 //Make the different types of weed
-                Weed Crabgrass = new Weed(field.Name, "Crabgrass");
-                Weed Quackgrass = new Weed(field.Name, "Quackgrass");
-                Weed MoringGlory = new Weed(field.Name, "Moring Glory");
-                Weed Pigweed = new Weed(field.Name, "Pigweed");
+                Weed Crabgrass = new Weed("Crabgrass");
+                Weed Quackgrass = new Weed("Quackgrass");
+                Weed MoringGlory = new Weed("Moring Glory");
+                Weed Pigweed = new Weed("Pigweed");
 
                 //Make the different types of herbicide
-                Herbicide Simazine = new Herbicide(field.Name, 5.25, "Simazine");
-                Herbicide Terbuthylazine = new Herbicide(field.Name, 42, "Terbuthylazine");
-                Herbicide Versatil = new Herbicide(field.Name, 2.55, "Versatil");
+                Herbicide Simazine = new Herbicide(5.25, "Simazine");
+                Herbicide Terbuthylazine = new Herbicide(42, "Terbuthylazine");
+                Herbicide Versatil = new Herbicide(2.55, "Versatil");
 
                 //Make the different types of crop
-                Crop Wheat = new Crop(field.Name, "Wheat");
+                Crop Wheat = new Crop("Wheat");
 
                 //Make the number of rows in the field
                 Row row1 = new Row(field.Name, 1, Crabgrass, Wheat, Simazine);
@@ -73,16 +72,17 @@ namespace Jordbrugsteknologi
                 field.rows.Add(row11);
                 field.rows.Add(row12);
 
-                //CreateCompleteField(field);
+            timer.Start();
+            //CreateCompleteField(field);
 
-                //Row row13 = new Row(field.Name, 13, Quackgrass, Wheat, Versatil);
-                //CreateRowInField(row13, field);
+            //Row row13 = new Row(field.Name, 13, Quackgrass, Wheat, Versatil);
+            //CreateRowInField(row13, field);
 
-                //resultRow = ReadRowInField(row5.Number, field.Name);
+            //resultRow = ReadRowInField(row5.Number, field.Name);
 
-                resultField = ReadCompleteField(field.Name);
+            resultField = ReadCompleteField(field.Name);
 
-                //Console.ReadKey();
+            //Console.ReadKey();
             
             timer.Stop();
             Console.WriteLine(timer.Elapsed);

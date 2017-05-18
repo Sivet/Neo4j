@@ -10,7 +10,7 @@ namespace Jordbrugsteknologi
     {
         public string Name { get; set; }
         public Weed() { }
-        public Weed(string id, string name)
+        public Weed(string name)
         {
             this.Name = name;
         }

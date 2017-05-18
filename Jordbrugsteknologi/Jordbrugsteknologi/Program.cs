@@ -32,18 +32,18 @@ namespace Jordbrugsteknologi
                 Field field = new Field("Marken1", 2017);
 
                 //Make the different types of weed
-                Weed Crabgrass = new Weed("Crabgrass");
-                Weed Quackgrass = new Weed("Quackgrass");
-                Weed MoringGlory = new Weed("Moring Glory");
-                Weed Pigweed = new Weed("Pigweed");
+                Weed Crabgrass = new Weed("Lamb's Quarters");
+                Weed Quackgrass = new Weed("Dandelion");
+                Weed MoringGlory = new Weed("Buckhorn Plantain");
+                Weed Pigweed = new Weed("Chickweed");
 
                 //Make the different types of herbicide
-                Herbicide Simazine = new Herbicide(5.25, "Simazine");
-                Herbicide Terbuthylazine = new Herbicide(42, "Terbuthylazine");
-                Herbicide Versatil = new Herbicide(2.55, "Versatil");
+                Herbicide Simazine = new Herbicide(3.75, "Ortho");
+                Herbicide Terbuthylazine = new Herbicide(420, "Bayer ");
+                Herbicide Versatil = new Herbicide(16.55, "Scotts");
 
                 //Make the different types of crop
-                Crop Wheat = new Crop("Wheat");
+                Crop Wheat = new Crop("Havre");
 
                 //Make the number of rows in the field
                 Row row1 = new Row(field.Name, 1, Crabgrass, Wheat, Simazine);
@@ -74,7 +74,7 @@ namespace Jordbrugsteknologi
                 field.rows.Add(row12);
 
             timer.Start();
-            //CreateCompleteField(field);
+            CreateCompleteField(field);
 
             //Row row13 = new Row(field.Name, 13, Quackgrass, Wheat, Versatil);
             //CreateRowInField(row13, field);
@@ -93,7 +93,7 @@ namespace Jordbrugsteknologi
         }
         private void Connect()
         {
-            client = new GraphClient(new Uri("http://localhost:7474/db/data"), "username", "password");
+            client = new GraphClient(new Uri("http://85.27.195.63:7474/db/data"), "username", "password");
             client.Connect();
         }
         private void Disconnect()

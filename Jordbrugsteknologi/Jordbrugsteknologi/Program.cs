@@ -29,7 +29,7 @@ namespace Jordbrugsteknologi
             timer = new Stopwatch();
             
                 //Make the field
-                Field field = new Field("Marken1", 2017);
+                Field field = new Field("Marken2", 2017);
 
                 //Make the different types of weed
                 Weed Crabgrass = new Weed("Lamb's Quarters");
@@ -93,7 +93,7 @@ namespace Jordbrugsteknologi
         }
         private void Connect()
         {
-            client = new GraphClient(new Uri("http://85.27.195.63:7474/db/data"), "username", "password");
+            client = new GraphClient(new Uri("http://localhost:7474/db/data"), "username", "password");
             client.Connect();
         }
         private void Disconnect()
